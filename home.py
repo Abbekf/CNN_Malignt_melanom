@@ -2,8 +2,6 @@
 from pathlib import Path
 import io
 import streamlit as st
-import qrcode
-from io import BytesIO
 
 
 # ---------------- Page config ----------------
@@ -91,24 +89,20 @@ hudförändringar som **benigna** eller **maligna**. Projektet fokuserar på hel
         st.info("Använd sidomenyn till vänster för att öppna **Klassificerare** och **Utvärdering**.")
 
 with cR:
-
+    import streamlit as st
+    from urllib.parse import quote_plus
 
     st.subheader("📱 Dela appen med QR-kod")
     st.caption("Skanna QR-koden nedan för att öppna appen direkt:")
 
-    # Din fasta deployade URL
-    app_url = "https://ditt-deploy-namn.streamlit.app/"
+    app_url = "https://ditt-deploy-namn.streamlit.app/"  # byt till din riktiga URL
 
-    # Generera QR-kod
-    qr = qrcode.make(app_url)
-    buf = BytesIO()
-    qr.save(buf, format="PNG")
+    qr_img_url = f"https://api.qrserver.com/v1/create-qr-code/?size=360x360&data={quote_plus(app_url)}"
 
-    # Visa QR-koden
-    st.image(buf.getvalue(), caption="Öppna appen genom att scanna QR-koden", use_column_width=False)
-
-    # (valfritt: klickbar länk under QR-koden)
-    st.markdown(f"[Öppna appen här]({app_url})")
+    c1, c2, c3 = st.columns([1,2,1])
+    with c2:
+        st.image(qr_img_url, caption="Öppna appen genom att scanna QR-koden", use_container_width=True)
+        st.markdown(f"[Öppna appen här]({app_url})")
 
     st.markdown("---")
 
