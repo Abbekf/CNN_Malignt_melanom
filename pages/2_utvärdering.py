@@ -1,4 +1,4 @@
-# pages/3_utvardering.py
+# pages/2_utvärdering.py
 # -----------------------------------------------
 # Evaluation page: "insights image" + "expand to chart"
 # Uses files already in ./figures:
@@ -11,7 +11,17 @@ import streamlit as st
 
 st.set_page_config(page_title="Utvärdering", layout="wide")
 
-# ---------- Small style tweaks ----------
+# ---------- Load global CSS (theme) ----------
+def inject_css(path: str = "style.css"):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.warning(f"Hittade inte {path}. Kontrollera sökvägen i projektroten.")
+
+inject_css("style.css")  # <-- se till att style.css ligger i repo-roten
+
+# ---------- Small style tweaks (page-local) ----------
 st.markdown("""
 <style>
 .streamlit-expanderHeader { font-weight: 600; font-size: 1.02rem; }
@@ -44,10 +54,9 @@ def show_section(title: str, insight_path: str, chart_path: str = None):
             return
         cp = Path(chart_path)
         if cp.exists():
-            st.image(str(cp), use_column_width=True)
+            st.image(str(cp), use_container_width=True)  # new API
         else:
             st.warning(f"Hittade inte graf: {chart_path}")
-
 
 # ---------- Tabs ----------
 tab_loss, tab_acc, tab_cr, tab_cm, tab_roc, tab_umap = st.tabs(
@@ -56,48 +65,24 @@ tab_loss, tab_acc, tab_cr, tab_cm, tab_roc, tab_umap = st.tabs(
 
 # ---- LOSS ----
 with tab_loss:
-    show_section(
-        title="Loss",
-        insight_path="figures/loss_insights.png",
-        chart_path="figures/loss_curve.png"
-    )
+    show_section("Loss", "figures/loss_insights.png", "figures/loss_curve.png")
 
 # ---- ACCURACY ----
 with tab_acc:
-    show_section(
-        title="Accuracy",
-        insight_path="figures/accuracy_insights.png",
-        chart_path="figures/accuracy_curve.png"
-    )
+    show_section("Accuracy", "figures/accuracy_insights.png", "figures/accuracy_curve.png")
 
 # ---- CLASSIFICATION REPORT ----
 with tab_cr:
-    show_section(
-        title="Classification report",
-        insight_path="figures/classification_report_insights.png",
-        chart_path="figures/Classification_report.png"
-    )
+    show_section("Classification report", "figures/classification_report_insights.png", "figures/Classification_report.png")
 
 # ---- CONFUSION MATRIX ----
 with tab_cm:
-    show_section(
-        title="Confusion Matrix",
-        insight_path="figures/confusion_matrix_insights.png",
-        chart_path="figures/Confusion_matrix.png"
-    )
+    show_section("Confusion Matrix", "figures/confusion_matrix_insights.png", "figures/Confusion_matrix.png")
 
 # ---- ROC ----
 with tab_roc:
-    show_section(
-        title="ROC-kurva",
-        insight_path="figures/roc_curve_insights.png",
-        chart_path="figures/ROC_curve.png"
-    )
+    show_section("ROC-kurva", "figures/roc_curve_insights.png", "figures/ROC_curve.png")
 
 # ---- UMAP ----
 with tab_umap:
-    show_section(
-        title="UMAP",
-        insight_path="figures/umap_insights.png",
-        chart_path="figures/Umap.png"
-    )
+    show_section("UMAP", "figures/umap_insights.png", "figures/Umap.png")
