@@ -95,7 +95,7 @@ with cR:
     st.subheader("📱 Dela appen med QR-kod")
     st.caption("Skanna QR-koden nedan för att öppna appen direkt:")
 
-    app_url = "https://ditt-deploy-namn.streamlit.app/"  # byt till din riktiga URL
+    app_url = "https://abbekf-cnn-malignt-melanom-home-dpiqho.streamlit.app/"  # byt till din riktiga URL
 
     qr_img_url = f"https://api.qrserver.com/v1/create-qr-code/?size=360x360&data={quote_plus(app_url)}"
 
