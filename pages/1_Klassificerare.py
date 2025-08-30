@@ -20,6 +20,37 @@ import tensorflow as tf
 from tensorflow import keras
 
 
+import streamlit as st
+from streamlit.components.v1 import html
+
+# === Page setup ===
+st.set_page_config(
+    page_title="Malignt melanom",
+    layout="wide",                      # fyller hela skärmen
+    initial_sidebar_state="collapsed"   # göm sidomenyn på mobil
+)
+
+# === Gör sidan mobilvänlig (viewport) ===
+html('<meta name="viewport" content="width=device-width, initial-scale=1">', height=0)
+
+# === CSS som justerar för mobilskärmar ===
+st.markdown("""
+<style>
+@media (max-width: 768px){
+  .block-container {padding-top: 0.8rem; padding-left: 0.6rem; padding-right: 0.6rem;}
+  h1 {font-size: 1.6rem;}
+  h2 {font-size: 1.25rem;}
+  p, .stMarkdown p {font-size: 0.95rem; line-height: 1.35;}
+  .stButton>button {width: 100%;}
+  .st-emotion-cache-1gulkj5 {padding: 0.5rem !important;}
+}
+.stImage img {width: 100% !important; height: auto;}
+[data-testid="stDataFrame"] {overflow: hidden auto;}
+</style>
+""", unsafe_allow_html=True)
+
+
+
 try:
     import tensorflow as tf
 except Exception:
