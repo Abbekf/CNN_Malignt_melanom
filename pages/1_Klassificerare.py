@@ -23,32 +23,61 @@ from tensorflow import keras
 import streamlit as st
 from streamlit.components.v1 import html
 
-# === Page setup ===
-st.set_page_config(
-    page_title="Malignt melanom",
-    layout="wide",                      # fyller hela skärmen
-    initial_sidebar_state="collapsed"   # göm sidomenyn på mobil
-)
+import streamlit as st
+from streamlit.components.v1 import html
 
-# === Gör sidan mobilvänlig (viewport) ===
-html('<meta name="viewport" content="width=device-width, initial-scale=1">', height=0)
+# Måste vara allra först, innan något ritas
+st.set_page_config(page_title="Malignt melanom", layout="wide", initial_sidebar_state="collapsed")
 
-# === CSS som justerar för mobilskärmar ===
+# Viktigt för iPhone: hindra auto-zoom och sätt korrekt viewport
+html('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">', height=0)
+
+# HÅRD mobil-override. Lägg DENNA efter din egen CSS så den vinner.
 st.markdown("""
 <style>
-@media (max-width: 768px){
-  .block-container {padding-top: 0.8rem; padding-left: 0.6rem; padding-right: 0.6rem;}
-  h1 {font-size: 1.6rem;}
-  h2 {font-size: 1.25rem;}
-  p, .stMarkdown p {font-size: 0.95rem; line-height: 1.35;}
-  .stButton>button {width: 100%;}
-  .st-emotion-cache-1gulkj5 {padding: 0.5rem !important;}
+/* --- Bas: skala typografi via clamp så både desktop och mobil funkar --- */
+h1, .stMarkdown h1, [data-testid="stMarkdownContainer"] h1 {
+  font-size: clamp(1.4rem, 6vw, 2.4rem) !important;
+  line-height: 1.15 !important;
+  margin: 0.4rem 0 0.6rem 0 !important;
 }
-.stImage img {width: 100% !important; height: auto;}
-[data-testid="stDataFrame"] {overflow: hidden auto;}
+h2, .stMarkdown h2, [data-testid="stMarkdownContainer"] h2 {
+  font-size: clamp(1.1rem, 4.8vw, 1.8rem) !important;
+  line-height: 1.2 !important;
+  margin: 0.5rem 0 0.5rem 0 !important;
+}
+h3, .stMarkdown h3 { font-size: clamp(1rem, 4vw, 1.4rem) !important; }
+
+/* Brödtext */
+p, .stMarkdown p, [data-testid="stMarkdownContainer"] p, li {
+  font-size: clamp(0.95rem, 3.8vw, 1.05rem) !important;
+  line-height: 1.45 !important;
+}
+
+/* Container: mindre padding på mobil, men snygg maxbredd på desktop */
+.block-container { padding: min(3.5vw, 18px) !important; }
+section.main > div { max-width: 1200px; margin-left: auto; margin-right: auto; }
+
+/* Knappar och inputs i full bredd på mobil */
+@media (max-width: 768px){
+  .stButton>button, .stDownloadButton>button, .stTextInput>div>div>input,
+  .stFileUploader, .stSelectbox, .stNumberInput input { width: 100% !important; }
+}
+
+/* Bilder & figurer ska aldrig sticka utanför */
+.stImage img, .stPlotlyChart, .stAltairChart, .stPyplot {
+  width: 100% !important; height: auto !important;
+}
+.stPyplot, .stPlotlyChart { display: block; }
+
+/* DataFrames får horisontell scroll om de blir breda */
+[data-testid="stDataFrame"] { overflow: auto hidden; }
+
+/* Dölj huvudmeny och footer för renare mobilvy (valfritt) */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
-
 
 
 try:
