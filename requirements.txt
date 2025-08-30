@@ -1,6 +1,19 @@
+# Core
 streamlit
-matplotlib
+tensorflow
 numpy
-pillow
+pandas
 scikit-learn
-qrcode[pil]
+
+# Visualization
+matplotlib
+seaborn
+
+# Image handling
+pillow
+
+# Hyperparameter tuning (if needed)
+keras-tuner
+
+# QR code generation (if you use it)
+qrcode
