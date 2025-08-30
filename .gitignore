@@ -1,0 +1,33 @@
+# === Python cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.ipynb_checkpoints/
+
+# === Virtual envs ===
+.venv/
+venv/
+env/
+
+# === OS/Editor ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# === Data & modeller (ska inte upp på GitHub) ===
+exported_models/
+images1/
+kt_tuning/
+
+# === Stora filer ===
+*.h5
+*.keras
+*.ckpt
+*.weights.h5
+*.savedmodel/
+*.json
+
+# === Streamlit cache ===
+.streamlit/

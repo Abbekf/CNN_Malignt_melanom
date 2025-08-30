@@ -1,0 +1,152 @@
+/* =========================================================
+   Holo-MedTech Theme
+   Inspirerat av futuristisk medtech (blå/cyan hologram-look)
+   ========================================================= */
+
+:root{
+  --bg: #0a0f1a;              /* mörk bas */
+  --fg: #e6f1ff;              /* nästan vit text */
+  --muted: #9bb2d1;           /* sekundär text */
+
+  --card: rgba(22,28,45,.75); /* genomskinligt kort */
+  --card-border: rgba(120,180,255,.2);
+  --shadow: 0 12px 40px rgba(0,20,40,.45);
+
+  --accent: #38d0ff;          /* cyan/blå accent */
+  --accent-2: #8be9ff;
+  --accent-ink: #bfefff;
+
+  --benign: #3cf5a3;          /* grönblå benign */
+  --malignant: #ff6b8a;       /* rödrosa malignant */
+
+  --bar-bg: rgba(255,255,255,.07);
+}
+
+/* Bakgrund med holo-glow */
+html, body, .stApp{
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(56,208,255,.12), transparent 55%),
+    radial-gradient(1200px 600px at 85% 10%, rgba(139,233,255,.08), transparent 55%),
+    var(--bg);
+  color: var(--fg);
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Grid overlay faint */
+.stApp::before{
+  content:"";
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:26px 26px;
+  opacity:.25;
+}
+
+/* Container */
+.block-container{
+  position:relative; z-index:1;
+  max-width:1200px;
+  padding-top:1rem; padding-bottom:3rem;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"]{
+  background: rgba(15,22,35,.85);
+  backdrop-filter: blur(12px);
+  border-right:1px solid var(--card-border);
+  box-shadow: 10px 0 28px rgba(0,20,40,.45);
+  min-width:290px; max-width:320px;
+}
+
+/* Cards & hero */
+.mdc-card, .mdc-hero{
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.mdc-hero{
+  position:relative;
+  background: linear-gradient(135deg, rgba(22,28,45,.9), rgba(15,20,35,.7));
+}
+.mdc-hero::after{
+  content:""; position:absolute; inset:0; border-radius:18px; pointer-events:none;
+  background: linear-gradient(120deg, transparent 0%, rgba(56,208,255,.12) 40%, transparent 75%);
+}
+
+/* Text */
+h1,h2,h3{ color:var(--fg); }
+p,.stMarkdown p,.stCaption{ color:var(--muted); }
+
+/* Tabs */
+[data-baseweb="tab"]{
+  background: rgba(20,28,40,.7) !important;
+  color: var(--muted) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 10px 10px 0 0 !important;
+}
+[data-baseweb="tab"][aria-selected="true"]{
+  background: rgba(10,18,30,.95) !important;
+  border-bottom:2px solid var(--accent) !important;
+  color: var(--accent-ink) !important;
+  font-weight:700;
+}
+
+/* Buttons */
+.stButton > button{
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  color:#0a0f1a;
+  border:0; border-radius:12px;
+  padding:.7rem 1rem; font-weight:700;
+  box-shadow:0 10px 30px rgba(56,208,255,.35);
+}
+.stButton > button:hover{ filter:brightness(1.1); }
+
+/* File uploader */
+[data-testid="stFileUploader"]{
+  background: rgba(20,28,40,.8);
+  border:1px solid var(--card-border);
+  border-radius:14px;
+  padding:12px;
+  box-shadow: var(--shadow);
+}
+
+/* Image frame */
+.img-frame{
+  background: rgba(15,22,35,.9);
+  border:1px solid var(--card-border);
+  border-radius:16px;
+  padding:10px;
+  display:flex; justify-content:center;
+  box-shadow: var(--shadow);
+}
+.img-frame img{ border-radius:10px; display:block; height:auto; }
+
+/* Prediction badges */
+.badge{
+  display:inline-flex; align-items:center; gap:8px;
+  font-weight:700; padding:10px 14px;
+  border-radius:999px; font-size:.95rem;
+}
+.badge--benign{ background:rgba(60,245,163,.1); color:var(--benign); border:1px solid rgba(60,245,163,.3); }
+.badge--malignant{ background:rgba(255,107,138,.1); color:var(--malignant); border:1px solid rgba(255,107,138,.3); }
+
+/* Probability bars */
+.prob .bar{ width:100%; height:10px; background:var(--bar-bg); border-radius:999px; overflow:hidden; }
+.prob .bar > span{ display:block; height:100%; width:0%; border-radius:999px; transition:width 320ms ease; }
+.prob .bar > span.benign{ background: var(--benign); }
+.prob .bar > span.malignant{ background: var(--malignant); }
+
+/* Sliders */
+[data-baseweb="slider"] [role="slider"]{
+  border:2px solid var(--accent) !important;
+  box-shadow:0 0 0 6px rgba(56,208,255,.2) !important;
+}
+[data-baseweb="slider"] div[aria-hidden="true"]{
+  background:linear-gradient(90deg, var(--accent), var(--accent-2)) !important;
+}
+
+/* Footer */
+footer{ visibility:hidden; height:0; }
