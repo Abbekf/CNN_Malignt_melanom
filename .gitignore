@@ -31,3 +31,6 @@ kt_tuning/
 
 # === Streamlit cache ===
 .streamlit/
+
+
+!exported_models/keras_tuner_best_finetuned.h5

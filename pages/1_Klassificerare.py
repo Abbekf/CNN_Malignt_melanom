@@ -18,64 +18,77 @@ from PIL import Image
 import streamlit as st
 import tensorflow as tf
 from tensorflow import keras
-
-
-import streamlit as st
 from streamlit.components.v1 import html
 
-import streamlit as st
-from streamlit.components.v1 import html
-
-# Måste vara allra först, innan något ritas
+# Måste ligga tidigt
 st.set_page_config(page_title="Malignt melanom", layout="wide", initial_sidebar_state="collapsed")
-
-# Viktigt för iPhone: hindra auto-zoom och sätt korrekt viewport
 html('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">', height=0)
 
-# HÅRD mobil-override. Lägg DENNA efter din egen CSS så den vinner.
+# --- MOBIL ULTRA-COMPACT OVERRIDES ---
 st.markdown("""
 <style>
-/* --- Bas: skala typografi via clamp så både desktop och mobil funkar --- */
+/* Mindre grundtyp på mobil (gör allt kompaktare) */
+@media (max-width: 820px){
+  html { font-size: 14px !important; }                      /* sänker basen */
+  .block-container { padding: 10px !important; }            /* mindre sidopadding */
+  section.main > div { max-width: 100% !important; }        /* låt innehåll använda hela bredden */
+}
+
+/* Rubriker (tvinga ned storleken ordentligt) */
 h1, .stMarkdown h1, [data-testid="stMarkdownContainer"] h1 {
-  font-size: clamp(1.4rem, 6vw, 2.4rem) !important;
+  font-size: clamp(1.2rem, 4.2vw, 1.7rem) !important;
   line-height: 1.15 !important;
-  margin: 0.4rem 0 0.6rem 0 !important;
+  margin: 0.35rem 0 0.5rem 0 !important;
 }
 h2, .stMarkdown h2, [data-testid="stMarkdownContainer"] h2 {
-  font-size: clamp(1.1rem, 4.8vw, 1.8rem) !important;
+  font-size: clamp(1.05rem, 3.6vw, 1.35rem) !important;
   line-height: 1.2 !important;
-  margin: 0.5rem 0 0.5rem 0 !important;
+  margin: 0.4rem 0 0.45rem 0 !important;
 }
-h3, .stMarkdown h3 { font-size: clamp(1rem, 4vw, 1.4rem) !important; }
+h3, .stMarkdown h3 {
+  font-size: clamp(0.95rem, 3.2vw, 1.2rem) !important;
+}
 
-/* Brödtext */
+/* Brödtext & listor */
 p, .stMarkdown p, [data-testid="stMarkdownContainer"] p, li {
-  font-size: clamp(0.95rem, 3.8vw, 1.05rem) !important;
+  font-size: clamp(0.95rem, 3.3vw, 1.02rem) !important;
   line-height: 1.45 !important;
+  margin: 0.35rem 0 !important;
 }
 
-/* Container: mindre padding på mobil, men snygg maxbredd på desktop */
-.block-container { padding: min(3.5vw, 18px) !important; }
-section.main > div { max-width: 1200px; margin-left: auto; margin-right: auto; }
+/* Kort/containers med mycket luft: pressa ned padding */
+[data-testid="stVerticalBlock"] > div { padding: 0.6rem !important; }
 
-/* Knappar och inputs i full bredd på mobil */
-@media (max-width: 768px){
-  .stButton>button, .stDownloadButton>button, .stTextInput>div>div>input,
-  .stFileUploader, .stSelectbox, .stNumberInput input { width: 100% !important; }
+/* Knappar / inputs i full bredd på mobil */
+@media (max-width: 820px){
+  .stButton>button, .stDownloadButton>button,
+  .stTextInput input, .stNumberInput input, .stSelectbox, .stFileUploader {
+    width: 100% !important;
+  }
 }
 
-/* Bilder & figurer ska aldrig sticka utanför */
-.stImage img, .stPlotlyChart, .stAltairChart, .stPyplot {
-  width: 100% !important; height: auto !important;
+/* Bilder & diagram: fyll bredd men inte mer än skärmen höjdmässigt */
+.stImage img, .stPyplot, .stPlotlyChart, .stAltairChart {
+  width: 100% !important; height: auto !important; max-height: 80vh !important;
 }
-.stPyplot, .stPlotlyChart { display: block; }
 
-/* DataFrames får horisontell scroll om de blir breda */
+/* Tabs: gör listan scroll-bar istället för att trycka ihop titlar */
+[data-baseweb="tab-list"] {
+  overflow-x: auto !important;
+  flex-wrap: nowrap !important;
+  scrollbar-width: none;
+}
+[data-baseweb="tab-list"]::-webkit-scrollbar { display: none; }
+[data-baseweb="tab"] { min-width: max-content !important; }
+
+/* Tab-panel: lite tajtare padding */
+[data-baseweb="tab-panel"] { padding: 0.5rem 0 0 0 !important; }
+
+/* Tabeller – horisontell scroll vid behov */
 [data-testid="stDataFrame"] { overflow: auto hidden; }
 
-/* Dölj huvudmeny och footer för renare mobilvy (valfritt) */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
+/* Dölj Streamlit-menyer på mobil för ren vy (frivilligt) */
+@media (max-width: 820px){ #MainMenu, footer { display: none !important; } }
 </style>
 """, unsafe_allow_html=True)
 

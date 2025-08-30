@@ -8,6 +8,82 @@
 
 from pathlib import Path
 import streamlit as st
+from streamlit.components.v1 import html
+
+
+# Måste ligga tidigt
+st.set_page_config(page_title="Malignt melanom", layout="wide", initial_sidebar_state="collapsed")
+html('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">', height=0)
+
+# --- MOBIL ULTRA-COMPACT OVERRIDES ---
+st.markdown("""
+<style>
+/* Mindre grundtyp på mobil (gör allt kompaktare) */
+@media (max-width: 820px){
+  html { font-size: 14px !important; }                      /* sänker basen */
+  .block-container { padding: 10px !important; }            /* mindre sidopadding */
+  section.main > div { max-width: 100% !important; }        /* låt innehåll använda hela bredden */
+}
+
+/* Rubriker (tvinga ned storleken ordentligt) */
+h1, .stMarkdown h1, [data-testid="stMarkdownContainer"] h1 {
+  font-size: clamp(1.2rem, 4.2vw, 1.7rem) !important;
+  line-height: 1.15 !important;
+  margin: 0.35rem 0 0.5rem 0 !important;
+}
+h2, .stMarkdown h2, [data-testid="stMarkdownContainer"] h2 {
+  font-size: clamp(1.05rem, 3.6vw, 1.35rem) !important;
+  line-height: 1.2 !important;
+  margin: 0.4rem 0 0.45rem 0 !important;
+}
+h3, .stMarkdown h3 {
+  font-size: clamp(0.95rem, 3.2vw, 1.2rem) !important;
+}
+
+/* Brödtext & listor */
+p, .stMarkdown p, [data-testid="stMarkdownContainer"] p, li {
+  font-size: clamp(0.95rem, 3.3vw, 1.02rem) !important;
+  line-height: 1.45 !important;
+  margin: 0.35rem 0 !important;
+}
+
+/* Kort/containers med mycket luft: pressa ned padding */
+[data-testid="stVerticalBlock"] > div { padding: 0.6rem !important; }
+
+/* Knappar / inputs i full bredd på mobil */
+@media (max-width: 820px){
+  .stButton>button, .stDownloadButton>button,
+  .stTextInput input, .stNumberInput input, .stSelectbox, .stFileUploader {
+    width: 100% !important;
+  }
+}
+
+/* Bilder & diagram: fyll bredd men inte mer än skärmen höjdmässigt */
+.stImage img, .stPyplot, .stPlotlyChart, .stAltairChart {
+  width: 100% !important; height: auto !important; max-height: 80vh !important;
+}
+
+/* Tabs: gör listan scroll-bar istället för att trycka ihop titlar */
+[data-baseweb="tab-list"] {
+  overflow-x: auto !important;
+  flex-wrap: nowrap !important;
+  scrollbar-width: none;
+}
+[data-baseweb="tab-list"]::-webkit-scrollbar { display: none; }
+[data-baseweb="tab"] { min-width: max-content !important; }
+
+/* Tab-panel: lite tajtare padding */
+[data-baseweb="tab-panel"] { padding: 0.5rem 0 0 0 !important; }
+
+/* Tabeller – horisontell scroll vid behov */
+[data-testid="stDataFrame"] { overflow: auto hidden; }
+
+/* Dölj Streamlit-menyer på mobil för ren vy (frivilligt) */
+@media (max-width: 820px){ #MainMenu, footer { display: none !important; } }
+</style>
+""", unsafe_allow_html=True)
+
+
 
 st.set_page_config(page_title="Utvärdering", layout="wide")
 
