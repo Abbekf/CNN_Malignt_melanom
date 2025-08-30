@@ -7,6 +7,10 @@
 # - Robust mot list/tuple-outputs
 # ---------------------------------------------------------------
 
+
+
+
+
 from pathlib import Path
 import io
 import numpy as np
@@ -14,6 +18,18 @@ from PIL import Image
 import streamlit as st
 import tensorflow as tf
 from tensorflow import keras
+
+
+try:
+    import tensorflow as tf
+except Exception:
+    tf = None
+
+# när du ska ladda modellen:
+if tf is None:
+    st.warning("Modellen är avstängd i moln-deploy (ingen TensorFlow). Demo visar bara UI.")
+    st.stop()
+
 
 # ---------- Konfiguration ----------
 MODEL_PATH = Path(__file__).resolve().parent.parent / "exported_models" / "keras_tuner_best_finetuned.h5"
