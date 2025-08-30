@@ -2,6 +2,9 @@
 from pathlib import Path
 import io
 import streamlit as st
+import qrcode
+from io import BytesIO
+
 
 # ---------------- Page config ----------------
 st.set_page_config(
@@ -88,34 +91,26 @@ hudförändringar som **benigna** eller **maligna**. Projektet fokuserar på hel
         st.info("Använd sidomenyn till vänster för att öppna **Klassificerare** och **Utvärdering**.")
 
 with cR:
-    st.subheader("Dela appen med QR-kod")
-    st.caption("Klistra in din **deployade URL** och generera en QR-kod som publiken kan skanna.")
-    app_url = st.text_input("App-URL (https://…)", value="", placeholder="https://ditt-deploy-namn.streamlit.app/")
-    gen = st.button("Generera QR-kod")
 
-    if gen and not app_url.strip():
-        st.error("Fyll i URL först.")
-    if gen and app_url.strip():
-        try:
-            import qrcode
-            img = qrcode.make(app_url.strip())
-            buf = io.BytesIO()
-            img.save(buf, format="PNG"); buf.seek(0)
-            st.image(buf, caption="Skanna för att öppna appen", use_container_width=False)
 
-            # Save for later use (e.g., slides)
-            figures = Path(__file__).parent / "figures"
-            figures.mkdir(exist_ok=True)
-            out = figures / "app_qr.png"
-            img.save(out)
-            st.caption(f"QR sparad till: {out}")
-        except Exception as e:
-            st.info(
-                "QR-biblioteket saknas. Lägg till `qrcode[pil]` i `requirements.txt` och deploya igen.\n\n"
-                f"Teknisk info: {e}"
-            )
+    st.subheader("📱 Dela appen med QR-kod")
+    st.caption("Skanna QR-koden nedan för att öppna appen direkt:")
 
-st.markdown("---")
+    # Din fasta deployade URL
+    app_url = "https://ditt-deploy-namn.streamlit.app/"
+
+    # Generera QR-kod
+    qr = qrcode.make(app_url)
+    buf = BytesIO()
+    qr.save(buf, format="PNG")
+
+    # Visa QR-koden
+    st.image(buf.getvalue(), caption="Öppna appen genom att scanna QR-koden", use_column_width=False)
+
+    # (valfritt: klickbar länk under QR-koden)
+    st.markdown(f"[Öppna appen här]({app_url})")
+
+    st.markdown("---")
 
 # ---------------- Project details ----------------
 st.subheader("Projekt i korthet")
