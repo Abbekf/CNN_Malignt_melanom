@@ -2,12 +2,10 @@
 streamlit
 tensorflow
 numpy
-pandas
 scikit-learn
 
 # Visualization
 matplotlib
-seaborn
 
 # Image handling
 pillow
@@ -15,5 +13,3 @@ pillow
 # Hyperparameter tuning (if needed)
 keras-tuner
 
-# QR code generation (if you use it)
-qrcode

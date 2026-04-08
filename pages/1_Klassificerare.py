@@ -1,122 +1,30 @@
-# pages/1_Klassificerare.py
-# ---------------------------------------------------------------
-# Live-klassificerare för melanom
-# - Låst input 224x224
-# - Justerbar förhandsgranskning
-# - Score-CAM alltid på (ingen Grad-CAM)
-# - Robust mot list/tuple-outputs
-# ---------------------------------------------------------------
-
-
-
-
-
 from pathlib import Path
 import io
 import numpy as np
 from PIL import Image
 import streamlit as st
-import tensorflow as tf
-from tensorflow import keras
-from streamlit.components.v1 import html
-
-# Måste ligga tidigt
-st.set_page_config(page_title="Malignt melanom", layout="wide", initial_sidebar_state="collapsed")
-html('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">', height=0)
-
-# --- MOBIL ULTRA-COMPACT OVERRIDES ---
-st.markdown("""
-<style>
-/* Mindre grundtyp på mobil (gör allt kompaktare) */
-@media (max-width: 820px){
-  html { font-size: 14px !important; }                      /* sänker basen */
-  .block-container { padding: 10px !important; }            /* mindre sidopadding */
-  section.main > div { max-width: 100% !important; }        /* låt innehåll använda hela bredden */
-}
-
-/* Rubriker (tvinga ned storleken ordentligt) */
-h1, .stMarkdown h1, [data-testid="stMarkdownContainer"] h1 {
-  font-size: clamp(1.2rem, 4.2vw, 1.7rem) !important;
-  line-height: 1.15 !important;
-  margin: 0.35rem 0 0.5rem 0 !important;
-}
-h2, .stMarkdown h2, [data-testid="stMarkdownContainer"] h2 {
-  font-size: clamp(1.05rem, 3.6vw, 1.35rem) !important;
-  line-height: 1.2 !important;
-  margin: 0.4rem 0 0.45rem 0 !important;
-}
-h3, .stMarkdown h3 {
-  font-size: clamp(0.95rem, 3.2vw, 1.2rem) !important;
-}
-
-/* Brödtext & listor */
-p, .stMarkdown p, [data-testid="stMarkdownContainer"] p, li {
-  font-size: clamp(0.95rem, 3.3vw, 1.02rem) !important;
-  line-height: 1.45 !important;
-  margin: 0.35rem 0 !important;
-}
-
-/* Kort/containers med mycket luft: pressa ned padding */
-[data-testid="stVerticalBlock"] > div { padding: 0.6rem !important; }
-
-/* Knappar / inputs i full bredd på mobil */
-@media (max-width: 820px){
-  .stButton>button, .stDownloadButton>button,
-  .stTextInput input, .stNumberInput input, .stSelectbox, .stFileUploader {
-    width: 100% !important;
-  }
-}
-
-/* Bilder & diagram: fyll bredd men inte mer än skärmen höjdmässigt */
-.stImage img, .stPyplot, .stPlotlyChart, .stAltairChart {
-  width: 100% !important; height: auto !important; max-height: 80vh !important;
-}
-
-/* Tabs: gör listan scroll-bar istället för att trycka ihop titlar */
-[data-baseweb="tab-list"] {
-  overflow-x: auto !important;
-  flex-wrap: nowrap !important;
-  scrollbar-width: none;
-}
-[data-baseweb="tab-list"]::-webkit-scrollbar { display: none; }
-[data-baseweb="tab"] { min-width: max-content !important; }
-
-/* Tab-panel: lite tajtare padding */
-[data-baseweb="tab-panel"] { padding: 0.5rem 0 0 0 !important; }
-
-/* Tabeller – horisontell scroll vid behov */
-[data-testid="stDataFrame"] { overflow: auto hidden; }
-
-/* Dölj Streamlit-menyer på mobil för ren vy (frivilligt) */
-@media (max-width: 820px){ #MainMenu, footer { display: none !important; } }
-</style>
-""", unsafe_allow_html=True)
-
 
 try:
     import tensorflow as tf
+    from tensorflow import keras
 except Exception:
     tf = None
 
-# när du ska ladda modellen:
 if tf is None:
     st.warning("Modellen är avstängd i moln-deploy (ingen TensorFlow). Demo visar bara UI.")
     st.stop()
 
 
-# ---------- Konfiguration ----------
 MODEL_PATH = Path(__file__).resolve().parent.parent / "exported_models" / "keras_tuner_best_finetuned.h5"
 CLASS_NAMES = ["benign", "malignant"]
-FIXED_INPUT_SIZE = (224, 224)  # låst för inferens
+FIXED_INPUT_SIZE = (224, 224)
 
 st.set_page_config(page_title="Klassificerare", layout="wide", initial_sidebar_state="expanded")
 
-# CSS (från projektroten)
 css_path = Path(__file__).resolve().parents[1] / "style.css"
 if css_path.exists():
     st.markdown(f"<style>{css_path.read_text()}</style>", unsafe_allow_html=True)
 
-# ---------- Hjälpfunktioner ----------
 def _preprocess_pil(img: Image.Image, target_size=(224, 224)) -> np.ndarray:
     """PIL -> normaliserat batch-tensor [1,H,W,3] i [0,1]."""
     img = img.convert("RGB").resize(target_size)
@@ -129,11 +37,11 @@ def _predict(model: keras.Model, img_tensor: np.ndarray) -> float:
     if isinstance(pred, (list, tuple)):
         pred = pred[0]
     pred = np.asarray(pred)
-    if pred.ndim == 2 and pred.shape[1] == 1:      # sigmoid (N,1)
+    if pred.ndim == 2 and pred.shape[1] == 1:
         return float(pred[0, 0])
-    if pred.ndim == 2 and pred.shape[1] == 2:      # softmax (N,2)
+    if pred.ndim == 2 and pred.shape[1] == 2:
         return float(pred[0, 1])
-    if pred.ndim == 1 and pred.shape[0] >= 1:      # (N,)
+    if pred.ndim == 1 and pred.shape[0] >= 1:
         return float(pred[0])
     raise ValueError(f"Unexpected model output shape: {pred.shape}")
 
@@ -162,7 +70,6 @@ def _candidate_conv_layers(model: keras.Model):
                 pass
     return names
 
-# ---- Score-CAM (ingen gradient, bara forward passes) ----
 def _score_cam(model: keras.Model, img_tensor: np.ndarray, layer_name: str,
                class_index: int = 1, max_channels: int = 32) -> np.ndarray:
     """
@@ -178,43 +85,38 @@ def _score_cam(model: keras.Model, img_tensor: np.ndarray, layer_name: str,
     fmap = fmap_model(img_tensor)
     if isinstance(fmap, (list, tuple)):
         fmap = fmap[0]
-    fmap = tf.convert_to_tensor(fmap)   # [1,h,w,c]
+    fmap = tf.convert_to_tensor(fmap)
     c = int(fmap.shape[-1])
 
     use_c = min(c, max_channels)
-    fmap = fmap[:, :, :, :use_c]        # [1,h,w,use_c]
-
-    # 2) Normalisera + skala upp till [H,W,use_c]
+    fmap = fmap[:, :, :, :use_c]
     fmap_min = tf.reduce_min(fmap, axis=(1, 2), keepdims=True)
     fmap_max = tf.reduce_max(fmap, axis=(1, 2), keepdims=True)
     denom = tf.where(fmap_max - fmap_min > 1e-9, fmap_max - fmap_min, tf.ones_like(fmap_max))
     fmap_norm = (fmap - fmap_min) / denom
-    fmap_up = tf.image.resize(fmap_norm[0], size=FIXED_INPUT_SIZE, method="bilinear")  # [H,W,use_c]
+    fmap_up = tf.image.resize(fmap_norm[0], size=FIXED_INPUT_SIZE, method="bilinear")
     fmap_up = tf.clip_by_value(fmap_up, 0.0, 1.0)
 
-    # 3) Bygg batch med maskerade bilder: [use_c,H,W,3]
-    img = tf.convert_to_tensor(img_tensor[0])                 # [H,W,3]
-    masks = tf.transpose(fmap_up, [2, 0, 1])[:, :, :, None]   # [use_c,H,W,1]
-    img_batch = img[None, ...]                                # [1,H,W,3]
-    masked_batch = img_batch * masks                          # [use_c,H,W,3]  (broadcast korrekt)
+    img = tf.convert_to_tensor(img_tensor[0])
+    masks = tf.transpose(fmap_up, [2, 0, 1])[:, :, :, None]
+    img_batch = img[None, ...]
+    masked_batch = img_batch * masks
 
     preds = model.predict(masked_batch, verbose=0)
     if isinstance(preds, (list, tuple)):
         preds = preds[0]
     preds = tf.convert_to_tensor(preds)
 
-    # 4) Klass-score
     if preds.shape.rank == 2 and preds.shape[-1] >= 2:
-        scores = preds[:, class_index]           # [use_c]
+        scores = preds[:, class_index]
     elif preds.shape.rank == 2 and preds.shape[-1] == 1:
-        scores = preds[:, 0]                     # [use_c]
+        scores = preds[:, 0]
     elif preds.shape.rank == 1:
-        scores = preds                           # [use_c]
+        scores = preds
     else:
         flat = tf.reshape(preds, (tf.shape(preds)[0], -1))
         scores = flat[:, 0]
 
-    # Viktad summa -> [H,W]
     weighted = tf.einsum("chw, c -> hw", tf.transpose(fmap_up, [2, 0, 1]), scores)
     weighted = tf.nn.relu(weighted)
     weighted = weighted / (tf.reduce_max(weighted) + 1e-8)
@@ -225,12 +127,11 @@ def _overlay_heatmap_on_pil(pil_img: Image.Image, heatmap: np.ndarray,
     """Färglägg heatmap med matplotlib colormap och blanda med originalbilden."""
     import matplotlib.cm as cm
     heat_uint8 = np.uint8(255 * np.clip(heatmap, 0, 1))
-    colored = cm.get_cmap(cmap)(heat_uint8)[..., :3]  # slopa alpha
+    colored = cm.get_cmap(cmap)(heat_uint8)[..., :3]
     colored = (colored * 255).astype(np.uint8)
     heat_pil = Image.fromarray(colored).resize(pil_img.size, resample=Image.BILINEAR)
     return Image.blend(pil_img.convert("RGB"), heat_pil, alpha=float(intensity))
 
-# ---------- UI ----------
 st.title("🩺 Live-klassificerare")
 st.caption(
     "Den här sidan använder **endast** modellen `exported_models/keras_tuner_best_finetuned.h5`."
