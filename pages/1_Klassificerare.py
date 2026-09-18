@@ -129,9 +129,9 @@ def _score_cam(model: keras.Model, img_tensor: np.ndarray, layer_name: str,
 def _overlay_heatmap_on_pil(pil_img: Image.Image, heatmap: np.ndarray,
                             intensity: float = 0.45, cmap: str = "jet") -> Image.Image:
     """Färglägg heatmap med matplotlib colormap och blanda med originalbilden."""
-    import matplotlib.cm as cm
+    import matplotlib as mpl
     heat_uint8 = np.uint8(255 * np.clip(heatmap, 0, 1))
-    colored = cm.colormaps.get_cmap(cmap)(heat_uint8)[..., :3]
+    colored = mpl.colormaps.get_cmap(cmap)(heat_uint8)[..., :3]
     colored = (colored * 255).astype(np.uint8)
     heat_pil = Image.fromarray(colored).resize(pil_img.size, resample=Image.BILINEAR)
     return Image.blend(pil_img.convert("RGB"), heat_pil, alpha=float(intensity))
