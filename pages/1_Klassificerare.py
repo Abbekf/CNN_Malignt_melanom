@@ -52,7 +52,8 @@ def _pct(x: float) -> str:
 def load_model_fixed() -> keras.Model:
     if not MODEL_PATH.exists():
         raise FileNotFoundError(f"Hittar inte modellen:\n{MODEL_PATH}")
-    return keras.models.load_model(str(MODEL_PATH))
+    # H5-filen innehåller en gammal träningskonfiguration som inte behövs för inferens.
+    return keras.models.load_model(str(MODEL_PATH), compile=False)
 
 def _candidate_conv_layers(model: keras.Model):
     """Lista alla lager som producerar 4D feature maps (oavsett lagertyp)."""
@@ -81,12 +82,14 @@ def _score_cam(model: keras.Model, img_tensor: np.ndarray, layer_name: str,
     """
     # 1) Feature maps
     conv_layer = model.get_layer(layer_name)
-    fmap_model = tf.keras.models.Model(inputs=model.inputs, outputs=conv_layer.output)
-    fmap = fmap_model(img_tensor)
+    fmap_model = keras.Model(inputs=model.inputs, outputs=conv_layer.output)
+    fmap = fmap_model(tf.convert_to_tensor(img_tensor), training=False)
     if isinstance(fmap, (list, tuple)):
         fmap = fmap[0]
     fmap = tf.convert_to_tensor(fmap)
-    c = int(fmap.shape[-1])
+    if len(fmap.shape) != 4 or fmap.shape[-1] is None:
+        raise RuntimeError(f"Lagret {layer_name} gav en ogiltig feature-map: {fmap.shape}")
+    c = int(tf.shape(fmap)[-1])
 
     use_c = min(c, max_channels)
     fmap = fmap[:, :, :, :use_c]
@@ -102,7 +105,8 @@ def _score_cam(model: keras.Model, img_tensor: np.ndarray, layer_name: str,
     img_batch = img[None, ...]
     masked_batch = img_batch * masks
 
-    preds = model.predict(masked_batch, verbose=0)
+    # Direkt modellanrop fungerar även med Keras 3:s nya predict-adapter.
+    preds = model(masked_batch, training=False)
     if isinstance(preds, (list, tuple)):
         preds = preds[0]
     preds = tf.convert_to_tensor(preds)
