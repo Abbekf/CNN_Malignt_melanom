@@ -131,7 +131,7 @@ def _overlay_heatmap_on_pil(pil_img: Image.Image, heatmap: np.ndarray,
     """Färglägg heatmap med matplotlib colormap och blanda med originalbilden."""
     import matplotlib.cm as cm
     heat_uint8 = np.uint8(255 * np.clip(heatmap, 0, 1))
-    colored = cm.get_cmap(cmap)(heat_uint8)[..., :3]
+    colored = cm.colormaps.get_cmap(cmap)(heat_uint8)[..., :3]
     colored = (colored * 255).astype(np.uint8)
     heat_pil = Image.fromarray(colored).resize(pil_img.size, resample=Image.BILINEAR)
     return Image.blend(pil_img.convert("RGB"), heat_pil, alpha=float(intensity))
