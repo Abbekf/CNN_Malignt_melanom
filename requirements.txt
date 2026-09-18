@@ -1,15 +1,16 @@
 # Core
-streamlit
-tensorflow
-numpy
-scikit-learn
+streamlit==1.40.1
+tensorflow==2.20.0
+keras==3.15.1
+numpy==2.2.6
+scikit-learn==1.5.1
 
 # Visualization
-matplotlib
+matplotlib==3.9.2
 
 # Image handling
-pillow
+pillow==11.0.0
 
 # Hyperparameter tuning (if needed)
-keras-tuner
+keras-tuner==1.4.8
 
